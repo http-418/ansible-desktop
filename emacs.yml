@@ -1,0 +1,143 @@
+  - name: Emacs
+    hosts: all
+    vars:
+      # This needs to be a simple version number, not a whole version tag.
+      emacs_target_version: "27.1"
+      
+      # Where the git tree will go.
+      emacs_source_directory: /usr/local/src/emacs
+      
+      # Where we will ultimately install.
+      emacs_target_directory: /opt/emacs
+      
+    tasks:
+      - name: Check installed emacs version
+        shell: "{{ emacs_target_directory }}/bin/emacs --version | head -1 | tr -d \\n"
+        ignore_errors: true
+        register: emacs_installed
+
+      - name: Set installed emacs version fact
+        set_fact:
+          emacs_installed_version: "{{ NaN if emacs_installed[\"failed\"] else emacs_installed.stdout }}"
+        
+      - name: Install development libraries
+        ansible.builtin.apt:
+          update_cache: yes
+          cache_valid_time: 300
+          state: latest
+          name:
+            - build-essential
+            - autoconf
+            - automake
+            - autotools-dev
+            - bsd-mailx
+            - debhelper
+            - dpkg-dev
+            - imagemagick
+            - libasound2-dev
+            - libcairo2-dev
+            - libdbus-1-dev
+            - libgconf2-dev
+            - libgif-dev
+            - libgnutls28-dev
+            - libgpm-dev
+            - libgtk-3-dev
+            - libjansson-dev
+            - libjpeg-dev
+            - liblockfile-dev
+            - libm17n-dev
+            - libmagick++-dev
+            - libncurses-dev
+            - libotf-dev
+            - libpng-dev
+            - librsvg2-dev
+            - libselinux1-dev
+            - libtiff5-dev
+            - libxml2-dev
+            - quilt
+            - sharutils
+            - texinfo
+            
+      - name: Create source and target directories
+        ansible.builtin.file:
+          path: "{{ item }}"
+          owner: ajones
+          group: ajones
+          mode: 0755
+          state: directory
+        loop:
+          - "{{ emacs_source_directory }}"
+          - "{{ emacs_target_directory }}"
+          
+      - name: Git checkout
+        become: yes
+        become_user: ajones
+        ansible.builtin.git:
+          repo: git://git.sv.gnu.org/emacs.git
+          dest: "{{ emacs_source_directory }}"
+          version: "emacs-{{ emacs_target_version }}"
+          
+      - name: "Emacs autogen.sh {{ emacs_target_version }}"
+        become: yes
+        become_user: ajones
+        command:
+          chdir: "{{ emacs_source_directory }}"
+          cmd: ./autogen.sh
+        when: emacs_installed_version.find(emacs_target_version) == -1
+        
+      - name: Emacs configure
+        become: yes
+        become_user: ajones
+        command:
+          chdir: "{{ emacs_source_directory }}"
+          cmd: "./configure --prefix {{ emacs_target_directory }}"
+        when: emacs_installed_version.find(emacs_target_version) == -1
+        
+      - name: Emacs make
+        become: yes
+        become_user: ajones
+        command:
+          chdir: "{{ emacs_source_directory }}"
+          cmd: "make clean"
+        when: emacs_installed_version.find(emacs_target_version) == -1
+
+      - name: Emacs make (This may take a long while!)
+        become: yes
+        become_user: ajones
+        command:
+          chdir: "{{ emacs_source_directory }}"
+          cmd: "make -j {{ ansible_processor_vcpus  }}"
+        when: emacs_installed_version.find(emacs_target_version) == -1
+        
+      - name: Emacs make install
+        become: yes
+        become_user: ajones
+        command:
+          chdir: "{{ emacs_source_directory }}"
+          cmd: make install
+        when: emacs_installed_version.find(emacs_target_version) == -1
+        
+      - name: Remove system emacs
+        ansible.builtin.apt:
+          name:
+            - emacs
+            - emacs-gtk
+            - emacs-lucid
+            - emacs-nox
+            - emacs-common
+            - emacs-bin-common
+          state: absent
+      - name: Get emacs binary names for symlinks
+        # This should never fail.
+        command: "ls {{ emacs_target_directory }}/bin"
+        register: emacs_bin_names
+      - name: "Set up symlinks for installed emacs ({{ emacs_target_version }})"
+        file:
+          path: "/usr/local/bin/{{ item }}"
+          src: "{{ emacs_target_directory }}/bin/{{ item }}"
+          state: link
+        loop:
+          - ctags
+          - ebrowse
+          - emacs
+          - emacsclient
