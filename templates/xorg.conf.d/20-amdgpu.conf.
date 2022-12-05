@@ -1,0 +1,8 @@
+# -*- mode: conf -*-
+
+Section "Device"
+  Identifier "AMD"
+  Driver "amdgpu"
+  Option "TearFree" "true"
+  Option "DRI" "3"
+EndSection

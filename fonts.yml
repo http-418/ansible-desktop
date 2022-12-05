@@ -1,0 +1,42 @@
+#
+# Play:: Fonts
+#
+# Copyright 2022 Andrew Jones
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+  - name: Fonts
+    hosts: all
+    tasks:
+      - name: Accept Microsoft EULA        
+        ansible.builtin.debconf:
+          name: ttf-mscorefonts-installer
+          question: msttcorefonts/accepted-mscorefonts-eula
+          value: 'true'
+          vtype: boolean
+      - name: Install packaged fonts
+        ansible.builtin.apt:
+          update_cache: yes
+          cache_valid_time: 300
+          state: latest
+          name:
+            - fonts-inconsolata
+            - fonts-liberation
+            - ttf-mscorefonts-installer
+            - xfonts-75dpi
+            - xfonts-100dpi
+            - xfonts-base
+            - xfonts-scalable
+      - name: Update font cache
+        shell: '/bin/fc-cache -v'

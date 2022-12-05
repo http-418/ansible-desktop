@@ -1,8 +1,26 @@
+#
+# Play:: Emacs
+#
+# Copyright 2022 Andrew Jones
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
   - name: Emacs
     hosts: all
     vars:
       # This needs to be a simple version number, not a whole version tag.
-      emacs_target_version: "27.1"
+      emacs_target_version: "28.2"
       
       # Where the git tree will go.
       emacs_source_directory: /usr/local/src/emacs
@@ -33,6 +51,7 @@
             - bsd-mailx
             - debhelper
             - dpkg-dev
+            - git
             - imagemagick
             - libasound2-dev
             - libcairo2-dev
@@ -54,6 +73,7 @@
             - libselinux1-dev
             - libtiff5-dev
             - libxml2-dev
+            - libxpm-dev
             - quilt
             - sharutils
             - texinfo
