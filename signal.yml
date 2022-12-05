@@ -1,0 +1,55 @@
+#
+# Play:: Signal
+#
+# Copyright 2022 Andrew Jones
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+  - import_playbook: fonts.yml
+
+  - name: Signal
+    hosts: all
+    tasks:
+      - name: Configure Signal repo signing key
+        ansible.builtin.apt_key:
+          data: "{{ lookup('ansible.builtin.file', 'keys/signal.org.asc') }}"
+          state: present
+          
+      - name: Configure Signal repo
+        ansible.builtin.apt_repository:
+          repo: "deb https://updates.signal.org/desktop/apt xenial main"
+          filename: signal
+          
+      - name: Install Signal desktop beta
+        ansible.builtin.apt:
+          update_cache: yes
+          cache_valid_time: 300
+          state: latest
+          name:
+            - signal-desktop-beta            
+ 
+      # Enable unprivileged NS cloning to avoid the need for a SUID helper
+      - name: Enable unprivileged NS cloning.
+        ansible.posix.sysctl:
+          name: 'kernel.unprivileged_userns_clone'
+          value: '1'
+          sysctl_file: /etc/sysctl.d/unprivileged_userns_clone.conf
+          reload: true
+
+      # With the sysctl fixed, we can strip the +s from the helper
+      - name: Remove SUID bits from Signal's chrome-sandbox
+        shell: 'chmod -s /opt/Signal*/chrome-sandbox'
+        args:
+          # We shell out for this to get the benefit of the shell glob.
+          warn: false
