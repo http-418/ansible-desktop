@@ -55,16 +55,26 @@
           group: root
           mode: 0444
         when: lshw_graphics.stdout.find('Intel') != -1
-        
-      - name: Configure AMD graphics
-        ansible.builtin.template:
-          src: templates/xorg.conf.d/20-amdgpu.conf.j2
-          dest: /etc/X11/xorg.conf.d/20-amdgpu.conf
-          owner: root
-          group: root
-          mode: 0444
-        when: lshw_graphics.stdout.find('AMD') != -1
 
+      - name: Configure AMD graphics
+        block:
+          - name: 20-amdgpu.conf
+            ansible.builtin.template:
+              src: templates/xorg.conf.d/20-amdgpu.conf.j2
+              dest: /etc/X11/xorg.conf.d/20-amdgpu.conf
+              owner: root
+              group: root
+              mode: 0444
+          - name: Install VAAPI and VDPAU mesa drivers
+            ansible.builtin.apt:
+              update_cache: yes
+              cache_valid_time: 300
+              state: latest
+              name:
+                - mesa-va-drivers
+                - mesa-vdpau-drivers
+        when: lshw_graphics.stdout.find('AMD') != -1
+              
       - name: Preseed x-display-manager
         debconf:
           name: xdm
