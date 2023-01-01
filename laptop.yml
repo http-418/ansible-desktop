@@ -1,7 +1,7 @@
 #
-# Play:: KDE
+# Play:: Laptop
 #
-# Copyright 2022 Andrew Jones
+# Copyright 2023 Andrew Jones
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,20 +16,18 @@
 # limitations under the License.
 #
 
-  - import_playbook: x11.yml
-
-  - name: KDE
+  - name: Laptop
     hosts: all
     tasks:
-      - name: Install KDE applications
+      - name: Install laptop-related packages
         ansible.builtin.apt:
           update_cache: yes
           cache_valid_time: 300
           state: latest
           name:
-            - kde-spectacle
-            - konsole
-            - kscreen
-            - plasma-desktop
-            - plasma-nm
-            - yakuake
+            - acpi
+            - fancontrol
+            - iw
+            - network-manager
+            - nscd
+            - wireless-tools # iwconfig

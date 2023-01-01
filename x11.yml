@@ -29,8 +29,9 @@
           name:
             - lshw
             - mesa-utils
+            - x11-apps # xwd
+            - xclip
             - xserver-xorg
-            # This is still way better than libinput in 2022
             - xserver-xorg-input-all
             - xserver-xorg-video-all
             
@@ -39,6 +40,7 @@
         ignore_errors: true
         register: lshw_graphics
         
+      # Synaptics is still way better than libinput in 2022
       - name: Configure X11 Synaptics driver
         ansible.builtin.template:
           src: templates/xorg.conf.d/20-synaptics.conf.j2

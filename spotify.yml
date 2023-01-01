@@ -1,5 +1,5 @@
 #
-# Play:: KDE
+# Play:: Spotify
 #
 # Copyright 2022 Andrew Jones
 #
@@ -16,20 +16,26 @@
 # limitations under the License.
 #
 
-  - import_playbook: x11.yml
+  - import_playbook: fonts.yml
 
-  - name: KDE
+  - name: Spotify
     hosts: all
     tasks:
-      - name: Install KDE applications
+      - name: Configure Spotify repo signing key
+        ansible.builtin.apt_key:
+          data: "{{ lookup('ansible.builtin.file', 'keys/spotify.gpg') }}"
+          state: present
+          
+      - name: Configure Spotify repo
+        ansible.builtin.apt_repository:
+          repo: "deb [arch=amd64] http://repository.spotify.com stable non-free"
+          filename: spotify
+          
+      - name: Install Spotify
         ansible.builtin.apt:
           update_cache: yes
           cache_valid_time: 300
           state: latest
           name:
-            - kde-spectacle
-            - konsole
-            - kscreen
-            - plasma-desktop
-            - plasma-nm
-            - yakuake
+            - spotify-client
+
