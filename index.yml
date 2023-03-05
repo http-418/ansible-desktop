@@ -62,3 +62,4 @@
   - import_playbook: signal.yml
   - import_playbook: spotify.yml
   - import_playbook: steam.yml
+  - import_playbook: wine.yml
