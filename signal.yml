@@ -50,6 +50,3 @@
       # With the sysctl fixed, we can strip the +s from the helper
       - name: Remove SUID bits from Signal's chrome-sandbox
         shell: 'chmod -s /opt/Signal*/chrome-sandbox'
-        args:
-          # We shell out for this to get the benefit of the shell glob.
-          warn: false
