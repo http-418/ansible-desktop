@@ -32,3 +32,9 @@
         repo: "deb http://deb.debian.org/debian {{ansible_lsb.codename}}-backports main"
         state: present
         filename: backports
+
+    - name: "Contrib & NonFree for {{ansible_lsb.codename}}"
+      ansible.builtin.apt_repository:
+        repo: "deb http://deb.debian.org/debian {{ansible_lsb.codename}} contrib non-free non-free-firmware"
+        state: present
+        filename: nonfree
