@@ -31,6 +31,7 @@
           cache_valid_time: 300
           state: latest
           name:
+            - fontconfig
             - fonts-inconsolata
             - fonts-liberation
             - ttf-mscorefonts-installer
