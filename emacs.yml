@@ -1,7 +1,7 @@
 #
 # Play:: Emacs
 #
-# Copyright 2022 Andrew Jones
+# Copyright 2023 Andrew Jones
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
     hosts: all
     vars:
       # This needs to be a simple version number, not a whole version tag.
-      emacs_target_version: "28.2"
+      emacs_target_version: "29.1"
       
       # Where the git tree will go.
       emacs_source_directory: /usr/local/src/emacs
