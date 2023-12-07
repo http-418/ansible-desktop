@@ -41,7 +41,7 @@
                 
       - name: Configure wine repo
         ansible.builtin.apt_repository:
-          repo: "deb [arch=amd64,i386] https://dl.winehq.org/wine-builds/debian bullseye main"
+          repo: "deb [arch=amd64,i386] https://dl.winehq.org/wine-builds/debian {{ansible_distribution_release}} main"
           filename: winehq
           
       - name: Install wine

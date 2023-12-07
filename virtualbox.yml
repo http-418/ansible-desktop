@@ -1,5 +1,5 @@
 #
-# Play:: Dotnet
+# Play:: Virtualbox
 #
 # Copyright 2023 Andrew Jones
 #
@@ -16,26 +16,31 @@
 # limitations under the License.
 #
 
-  - name: dotnet
+  - name: virtualbox
     hosts: all
     tasks:
-      - name: Configure dotnet repo signing key
+      - name: Configure virtualbox repo signing key
         ansible.builtin.apt_key:
-          data: "{{ lookup('ansible.builtin.file', 'keys/microsoft-dotnet.gpg') }}"
+          data: "{{lookup('ansible.builtin.file', 'keys/oracle_vbox_2016.asc')}}"
           state: present
           
-      - name: Configure dotnet repo
+      - name: Configure virtualbox repo
         ansible.builtin.apt_repository:
-          repo: "deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/debian/11/prod {{ansible_distribution_release}} main"
-          filename: dotnet
+          repo: "deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian {{ansible_distribution_release}} contrib"
+          filename: virtualbox
+
+      - name: Check kernel revision
+        shell: "uname -r"
+        ignore_errors: true
+        register: kernel_revision_name
           
-      - name: Install dotnet
+      - name: Install virtualbox
         ansible.builtin.apt:
           update_cache: yes
           cache_valid_time: 300
           state: latest
           name:
-            - dotnet-sdk-6.0
-            - dotnet-sdk-7.0
-            - powershell
+            - build-essential
+            - "linux-headers-{{kernel_revision_name.stdout}}"
+            - virtualbox-7.0
 
