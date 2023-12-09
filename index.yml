@@ -40,8 +40,10 @@
             - keepassx
             - libimage-exiftool-perl # exiftool
             - libjpeg-turbo-progs # jpegtran
+            - lsb-release # ansible relies on this for facts
             - maven
             - mpv
+            - net-tools # netstat
             - openjdk-17-jdk
             - openssh-client
             - openssh-server
