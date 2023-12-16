@@ -68,3 +68,4 @@
   - import_playbook: spotify.yml
   - import_playbook: steam.yml
   - import_playbook: wine.yml
+  - import_playbook: yubico_authenticator.yml
