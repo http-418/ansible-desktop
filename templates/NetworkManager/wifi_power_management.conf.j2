@@ -1,0 +1,8 @@
+[connection]
+# NM_SETTING_WIRELESS_POWERSAVE_DEFAULT (0): use the default value
+# NM_SETTING_WIRELESS_POWERSAVE_IGNORE  (1): don't touch existing setting
+# NM_SETTING_WIRELESS_POWERSAVE_DISABLE (2): disable powersave
+# NM_SETTING_WIRELESS_POWERSAVE_ENABLE  (3): enable powersave
+
+# The goal here is to disable wifi PM if a Qualcomm card is present.
+wifi.powersave = {{ 2 if lshw_network.stdout.find('QCNFA') == -1 else 3 }}

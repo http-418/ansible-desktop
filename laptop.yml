@@ -1,7 +1,7 @@
 #
 # Play:: Laptop
 #
-# Copyright 2023 Andrew Jones
+# Copyright 2024 Andrew Jones
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,38 @@
           name:
             - acpi
             - fancontrol
+            - firmware-linux-nonfree
             - iw
+            - lshw
             - network-manager
             - nscd
             - wireless-tools # iwconfig
+      - name: Install non-free firmware
+        ansible.builtin.apt:
+          update_cache: yes
+          cache_valid_time: 300
+          state: latest
+          name:
+            - firmware-linux-nonfree
+        register: firmware_linux_nonfree
+
+      - name: Collect network info
+        shell: "/bin/lshw -c network"
+        ignore_errors: true
+        register: lshw_network
+
+      - name: Disable wifi power management
+        ansible.builtin.template:
+          src: templates/NetworkManager/wifi_power_management.conf.j2
+          dest: /etc/NetworkManager/conf.d/wifi_power_management.conf
+          owner: root
+          group: root
+          mode: 0444
+        register: wifi_power_management
+
+      - name: Restart N-M
+        ansible.builtin.service:
+          name: NetworkManager
+          state: reloaded
+
+      # TODO: reload affected wireless modules when firmware changes
