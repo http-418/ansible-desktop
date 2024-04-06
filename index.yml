@@ -63,7 +63,8 @@
             
   - import_playbook: laptop.yml
     when: lshw_power.stdout.find('power') != -1
-        
+
+  - import_playbook: pcspkr.yml
   - import_playbook: signal.yml
   - import_playbook: spotify.yml
   - import_playbook: steam.yml
