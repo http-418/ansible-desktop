@@ -50,6 +50,7 @@
             - 'libxtst6'
             - 'libpulse0:i386'
             - 'libpulse0'
+            - 'lsof'
 
       - name: Pre-seed Steam license agreement
         debconf:
