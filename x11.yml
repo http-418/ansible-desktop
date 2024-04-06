@@ -34,6 +34,7 @@
             - xserver-xorg
             - xserver-xorg-input-all
             - xserver-xorg-video-all
+            - xserver-xorg-input-synaptics # not included in metapackage?
             
       - name: Collect graphics info
         shell: "/bin/lshw -c display"
@@ -96,3 +97,4 @@
         ansible.builtin.service:
           name: xdm
           state: started
+          enabled: yes
