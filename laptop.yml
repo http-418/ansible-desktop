@@ -47,7 +47,7 @@
         ignore_errors: true
         register: lshw_network
 
-      - name: Disable wifi power management
+      - name: Disable wifi power management in NM
         ansible.builtin.template:
           src: templates/NetworkManager/wifi_power_management.conf.j2
           dest: /etc/NetworkManager/conf.d/wifi_power_management.conf
@@ -56,9 +56,37 @@
           mode: 0444
         register: wifi_power_management
 
+      - name: Install script to disable wifi power management for ath11k
+        ansible.builtin.template:
+          src: templates/ath11k/ath11k_disable_power_management.sh
+          dest: /sbin/ath11k_disable_power_management.sh
+          owner: root
+          group: root
+          mode: 0544
+        when: lshw_network.stdout.find('QCNFA') > -1
+
+      - name: Disable wifi power management on module load for ath11k_pci
+        ansible.builtin.template:
+          src: templates/ath11k/ath11k_pci.rules
+          dest: /etc/udev/rules.d/83-ath11k_pci.rules
+          owner: root
+          group: root
+          mode: 0444
+        when: lshw_network.stdout.find('QCNFA') > -1
+        
+      - name: Disable ath11k_pci during suspend/resume
+        ansible.builtin.template:
+          src: templates/ath11k/ath11k_sleep.sh
+          dest: /lib/systemd/system-sleep/ath11k_sleep
+          owner: root
+          group: root
+          mode: 0544
+        when: lshw_network.stdout.find('QCNFA') > -1
+          
       - name: Restart N-M
         ansible.builtin.service:
           name: NetworkManager
-          state: reloaded
+          state: restarted
+        when: wifi_power_management.changed
 
       # TODO: reload affected wireless modules when firmware changes

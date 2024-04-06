@@ -1,0 +1,1 @@
+ACTION=="add", SUBSYSTEM=="module", KERNEL=="ath11k_pci", RUN+="/sbin/ath11k_disable_power_management.sh"
