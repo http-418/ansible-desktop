@@ -37,6 +37,7 @@
             - cups-filters
             - imagemagick
             - irb
+            - iw # replaces iwconfig, new kernel driver
             - keepassx
             - libimage-exiftool-perl # exiftool
             - libjpeg-turbo-progs # jpegtran
@@ -44,6 +45,7 @@
             - maven
             - mpv
             - net-tools # netstat
+            - nvi # vi, non-vim
             - openjdk-17-jdk
             - openssh-client
             - openssh-server
@@ -54,7 +56,17 @@
             - ruby-dev
             - ruby
             - ruby-pry-byebug
+            - silversearcher-ag
             - unison
+
+      - name: Remove default editors
+        ansible.builtin.apt:
+          state: absent
+          purge: true
+          name:
+            - vim-tiny
+            - vim-common
+            - nano
             
       - name: Detect battery
         shell: "/bin/lshw -c power"
