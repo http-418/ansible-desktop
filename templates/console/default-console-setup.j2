@@ -1,0 +1,19 @@
+# -*- mode: sh -*-
+# CONFIGURATION FILE FOR SETUPCON
+
+# Consult the console-setup(5) manual page.
+#
+
+ACTIVE_CONSOLES="/dev/tty[1-6]"
+
+CHARMAP="UTF-8"
+
+{% if fbset_output.stdout | int > 2560 %}
+CODESET="guess"
+FONT='solar24x32.psfu'
+VIDEOMODE=
+{% else %}
+CODESET="guess"
+FONT='latarcyrheb-sun16.psfu'
+VIDEOMODE=
+{% endif %}

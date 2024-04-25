@@ -1,0 +1,104 @@
+#
+# Play:: Console
+#
+# Copyright 2024 Andrew Jones
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+  - name: Console
+    hosts: all
+      
+    tasks:
+      - name: Install console-related packages
+        ansible.builtin.apt:
+          update_cache: yes
+          cache_valid_time: 300
+          state: latest
+          name:
+            - console-data
+            - console-setup
+            - fbset
+
+      - name: Get X resolution of first display
+        shell: fbset -s | grep mode\  | cut -d 'x' -f1 | cut -d '"' -f2
+        ignore_errors: true
+        register: fbset_output
+
+      - debug: var=fbset_output
+
+      - name: Download Sun font (small)
+        ansible.builtin.get_url:
+          url: https://git.kernel.org/pub/scm/linux/kernel/git/legion/kbd.git/plain/data/consolefonts/latarcyrheb-sun16.psfu
+          dest: /usr/share/consolefonts/latarcyrheb-sun16.psfu
+          owner: root
+          group: root
+          mode: 0444
+          checksum: sha256:e7994215404d34eabc1b100fdc60b51e794c9e46ac59a5ffabec99b1520ff9c5
+
+      - name: Download Sun font (large)
+        ansible.builtin.get_url:
+          url: https://git.kernel.org/pub/scm/linux/kernel/git/legion/kbd.git/plain/data/consolefonts/latarcyrheb-sun32.psfu
+          dest: /usr/share/consolefonts/latarcyrheb-sun32.psfu
+          owner: root
+          group: root
+          mode: 0444
+          checksum: sha256:f47e277d15d22b7dcc75c4009d66f53f31b1dcd2eb23e5176175de11df3c3e8d
+          
+      - name: Download Sun font (XXL)
+        ansible.builtin.get_url:
+          url: https://git.kernel.org/pub/scm/linux/kernel/git/legion/kbd.git/plain/data/consolefonts/solar24x32.psfu
+          dest: /usr/share/consolefonts/solar24x32.psfu
+          owner: root
+          group: root
+          mode: 0444
+          checksum: sha256:f98ba070cfe864170cf97d70f11527a97e5ec1f7e4ffc4c9d77bf5f8f2768890
+
+      - name: /etc/default/console-setup
+        ansible.builtin.template:
+          src: templates/console/default-console-setup.j2
+          dest: /etc/default/console-setup
+          owner: root
+          group: root
+          mode: '0644'
+        register: etc_default_console_setup
+          
+      - name: /etc/default/keyboard
+        ansible.builtin.template:
+          src: templates/console/default-keyboard.j2
+          dest: /etc/default/keyboard
+          owner: root
+          group: root
+          mode: '0644'
+        register: etc_default_keyboard
+
+      - name: setupcon
+        shell: setupcon
+        when: etc_default_console_setup.changed or etc_default_keyboard.changed
+
+      - name: setupcon (in case of X11)
+        shell: setupcon --save-only
+        when: etc_default_console_setup.changed or etc_default_keyboard.changed
+
+      - name: /etc/default/grub
+        ansible.builtin.template:
+          src: templates/console/default-grub.j2
+          dest: /etc/default/grub
+          owner: root
+          group: root
+          mode: '0644'
+        register: etc_default_grub
+
+      - name: update-grub
+        shell: update-grub
+        when: etc_default_grub.changed
