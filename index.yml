@@ -36,7 +36,6 @@
             - cups-client
             - cups-filters
             - imagemagick
-            - irb
             - iw # replaces iwconfig, new kernel driver
             - keepassx
             - libimage-exiftool-perl # exiftool
