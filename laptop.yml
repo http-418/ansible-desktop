@@ -82,11 +82,17 @@
           group: root
           mode: 0544
         when: lshw_network.stdout.find('QCNFA') > -1
-          
+
+      # TODO: reload affected wireless modules when firmware changes
       - name: Restart N-M
         ansible.builtin.service:
           name: NetworkManager
           state: restarted
         when: wifi_power_management.changed
 
-      # TODO: reload affected wireless modules when firmware changes
+
+      - stat: path=/proc/acpi/ibm/fan
+        register: proc_acpi_ibm_fan
+            
+  - import_playbook: thinkfan.yml
+    when: proc_acpi_ibm_fan.stat.exists
