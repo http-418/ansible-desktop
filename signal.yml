@@ -21,14 +21,18 @@
   - name: Signal
     hosts: all
     tasks:
-      - name: Configure Signal repo signing key
-        ansible.builtin.apt_key:
-          data: "{{ lookup('ansible.builtin.file', 'keys/signal.org.asc') }}"
-          state: present
+
+      - name: /usr/share/keyrings/signal.org.asc
+        ansible.builtin.template:
+          src: keys/signal.org.asc
+          dest: /usr/share/keyrings/signal.org.asc
+          owner: root
+          group: root
+          mode: '0444'
           
       - name: Configure Signal repo
         ansible.builtin.apt_repository:
-          repo: "deb [arch=amd64] https://updates.signal.org/desktop/apt xenial main"
+          repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/signal.org.asc] https://updates.signal.org/desktop/apt xenial main"
           filename: signal
           
       - name: Install Signal desktop beta

@@ -20,13 +20,16 @@
     hosts: all
     tasks:
       - name: Configure virtualbox repo signing key
-        ansible.builtin.apt_key:
-          data: "{{lookup('ansible.builtin.file', 'keys/oracle_vbox_2016.asc')}}"
-          state: present
+        ansible.builtin.copy:
+          dest: /etc/apt/keyrings/oracle_virtualbox_2016.gpg
+          owner: root
+          group: root
+          mode: '0444'
+          src: 'keys/oracle_virtualbox_2016.gpg'
           
       - name: Configure virtualbox repo
         ansible.builtin.apt_repository:
-          repo: "deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian {{ansible_distribution_release}} contrib"
+          repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/oracle_virtualbox_2016.gpg] http://download.virtualbox.org/virtualbox/debian {{ansible_distribution_release}} contrib"
           filename: virtualbox
 
       - name: Check kernel revision
@@ -42,5 +45,5 @@
           name:
             - build-essential
             - "linux-headers-{{kernel_revision_name.stdout}}"
-            - virtualbox-7.0
+            - virtualbox-7.2
 
