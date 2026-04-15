@@ -20,15 +20,25 @@
     hosts: all
     vars:
       # This needs to be a simple version number, not a whole version tag.
-      emacs_target_version: "29.3"
+      emacs_target_version: "30.2"
       
       # Where the git tree will go.
       emacs_source_directory: /usr/local/src/emacs
       
       # Where we will ultimately install.
       emacs_target_directory: /opt/emacs
+
+      # What user will own the build directories etc.
+      # Building as root will fail.
+      emacs_target_user: "{{lookup('ansible.builtin.env', 'SUDO_USER', default='nobody')}}"
       
     tasks:
+      - name: Check configured user
+        assert:
+          that: "emacs_target_user != 'root'"
+          fail_msg: "emacs_target_user var must not be root.  Building applications as root is unsafe."
+          success_msg: "User: {{emacs_target_user}}"
+        
       - name: Check installed emacs version
         shell: "{{ emacs_target_directory }}/bin/emacs --version | head -1 | tr -d \\n"
         ignore_errors: true
@@ -81,8 +91,8 @@
       - name: Create source and target directories
         ansible.builtin.file:
           path: "{{ item }}"
-          owner: ajones
-          group: ajones
+          owner: "{{emacs_target_user}}"
+          group: "{{emacs_target_user}}"
           mode: 0755
           state: directory
         loop:
@@ -91,15 +101,16 @@
           
       - name: Git checkout
         become: yes
-        become_user: ajones
+        become_user: "{{emacs_target_user}}"
         ansible.builtin.git:
           repo: git://git.sv.gnu.org/emacs.git
           dest: "{{ emacs_source_directory }}"
           version: "emacs-{{ emacs_target_version }}"
+          depth: 1
           
       - name: "Emacs autogen.sh {{ emacs_target_version }}"
         become: yes
-        become_user: ajones
+        become_user: "{{emacs_target_user}}"
         command:
           chdir: "{{ emacs_source_directory }}"
           cmd: ./autogen.sh
@@ -107,7 +118,7 @@
         
       - name: Emacs configure
         become: yes
-        become_user: ajones
+        become_user: "{{emacs_target_user}}"
         command:
           chdir: "{{ emacs_source_directory }}"
           cmd: "./configure --prefix {{ emacs_target_directory }}"
@@ -115,7 +126,7 @@
         
       - name: Emacs make
         become: yes
-        become_user: ajones
+        become_user: "{{emacs_target_user}}"
         command:
           chdir: "{{ emacs_source_directory }}"
           cmd: "make clean"
@@ -123,7 +134,7 @@
 
       - name: Emacs make (This may take a long while!)
         become: yes
-        become_user: ajones
+        become_user: "{{emacs_target_user}}"
         command:
           chdir: "{{ emacs_source_directory }}"
           cmd: "make -j {{ ansible_processor_vcpus  }}"
@@ -131,7 +142,7 @@
         
       - name: Emacs make install
         become: yes
-        become_user: ajones
+        become_user: "{{emacs_target_user}}"
         command:
           chdir: "{{ emacs_source_directory }}"
           cmd: make install
